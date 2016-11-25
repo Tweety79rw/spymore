@@ -11,7 +11,7 @@
   <body>
     <div id="game"></div>
     <script type="text/javascript">
-   
+    var road = [];
     var game = new Phaser.Game(1660, 940, Phaser.AUTO, 'game');
     var PhaserGame = function (game) {
         this.audi = null;
@@ -24,14 +24,22 @@
       },
       preload:function() {
         game.load.atlas('atlas','resources/spyHard.png','resources/spyHard.json',Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
-        
+        game.load.image('road','resources/streightRoad.png');
       },
 
       create:function() {
         game.physics.startSystem(Phaser.Physics.ARCADE);
+        for(var i = 0;i<10;i++){
+          road.push(game.add.sprite(game.width/2-128,(game.width -i*256),'road'));
+        }
+        road.forEach(function(d){
+          d.scale.setTo(.5,.5);
+          game.physics.arcade.enable(d);
+        });
         this.audi = game.add.sprite(game.width/2-64 ,game.height - 164,'atlas','Audi.png');
         this.audi.scale.setTo(.5,.5);
         game.physics.arcade.enable(this.audi);
+        
         this.cursor = game.input.keyboard.createCursorKeys();
         this.wasd = {
           up: game.input.keyboard.addKey(Phaser.Keyboard.W),
@@ -42,6 +50,17 @@
       },
 
       update:function() {
+        road.forEach(function(d,index,arr){
+          d.body.velocity.y = 300;
+          if(d.y > game.height){
+            var smallest = 9999999;
+            arr.forEach(function(s){
+              if(s.y < smallest)
+                smallest = s.y;
+            });
+            d.y = smallest - 256;
+          }
+          });
         if(this.cursor.left.isDown || this.wasd.left.isDown){
           this.audi.body.velocity.x=-150;
         }else if(this.cursor.right.isDown || this.wasd.right.isDown){
